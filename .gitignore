@@ -1,0 +1,7 @@
+node_modules
+public
+npm-debug.log
+.vscode
+coverage
+src/coverage
+TESTS*.xml

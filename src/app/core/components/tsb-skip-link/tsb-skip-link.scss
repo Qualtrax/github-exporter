@@ -1,0 +1,38 @@
+@import '../../../scss/sass.scss';
+
+.skip-link-component {
+  position: absolute;
+  left: -50vw;
+
+  .skip-to-banner-link,
+  .skip-main-link {
+    position: relative;
+    z-index: -1;
+    outline: none;
+    margin: 0;
+
+    &:focus,
+    &:active {
+      @include rem(font-size, 20px);
+      left: 50vw;
+      z-index: 100;
+      color: white;
+    }
+  }
+
+  .skip-main-link {
+    top: 0;
+  }
+
+  .skip-to-banner-link {
+    bottom: 50px;
+  }
+
+  @media (min-width: $tablet) {
+
+  }
+  
+  @media (min-width: $desktop) {
+
+  }
+}

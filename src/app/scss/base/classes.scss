@@ -1,0 +1,24 @@
+@import '../sass.scss';
+
+.standard-margins {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (min-width: $tablet) {
+  .standard-margins {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  p {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: $desktop) {
+  .standard-margins {
+    padding-left: calc((100vw - 1140px) / 2);
+    padding-right: calc((100vw - 1140px) / 2);
+  }
+}
