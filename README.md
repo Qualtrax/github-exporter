@@ -9,17 +9,6 @@ Ensure you have [node/npm](https://nodejs.org/en/) installed.
 - Run `npm install` in the root directory of this repository
 
 ## Local Development
-
-### Clean the project
- - Remove existing `.git` folder so you can init your own (`npm run clean`).
- - Update the appropriate tags in `src/wwwroot/index.html`
- ```html
-  <title>{Your app's name}</title>
-  <meta name="description" content="{description for your app}">
-  <meta name="author" content="{your name / company name}">
- ```
- - Update `src/wwwroot/images/faicon.png`
-
 ### Serving
 
 - Run `npm start` | This command will:
@@ -75,9 +64,5 @@ Ensure you have [node/npm](https://nodejs.org/en/) installed.
 
 1. `npm run copy-static-files`
 2. `npm run build`
-3. Deploy the `./public` folder
-
-**With** Pre-render
-
-1. `npm run publish`
-2. Deploy the `./public` folder
+2. `npm run package`
+3. Windows Build in `bin`
