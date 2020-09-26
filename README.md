@@ -1,6 +1,4 @@
-# tsbase-boilerplate
-
-Use this project to get up and running using tsbase and tsbase-components.
+# GitHub Exporter
 
 ## Installation
 
