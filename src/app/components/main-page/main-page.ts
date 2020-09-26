@@ -1,6 +1,7 @@
 import { Queryable, Strings, HttpClient, HttpRequestMessage, HttpMethod } from 'tsbase';
 import { Component, BaseComponent, SeoService, Html, DomEventTypes, DataBind } from 'tsbase-components';
 import { Issue, RepositoryIssues, Comment } from '../../domain/GitHubDataTypes';
+import { HtmlValidations } from '../../enums/HtmlValidations';
 import { graphQlQuery, IssueStatus } from './GraphQlQuery';
 
 const ids = {
@@ -13,14 +14,9 @@ const ids = {
 export class HomeComponent extends BaseComponent {
   @DataBind githubToken!: string;
   private repositoryIssues: RepositoryIssues | null = null;
-  private request: HttpRequestMessage;
 
   constructor(private httpClient = new HttpClient()) {
     super();
-
-    this.request = new HttpRequestMessage();
-    this.request.Method = HttpMethod.POST;
-    this.request.RequestUri = 'https://api.github.com/graphql';
   }
 
   protected onInit = async (): Promise<void> => {
@@ -37,7 +33,7 @@ export class HomeComponent extends BaseComponent {
         <input id="${ids.githubToken}"
           type="text"
           placeholder="GitHub auth token"
-          required>
+          ${HtmlValidations.required}>
       </div>
 
       <button id="${ids.submitButton}">Submit</button>
@@ -88,13 +84,7 @@ export class HomeComponent extends BaseComponent {
     if (event && this.inputValid()) {
       event.preventDefault();
 
-      this.request.Content = JSON.stringify({query: graphQlQuery(5, IssueStatus.Closed)});
-      this.request.Headers = [
-        { key: 'Authorization', value: `Bearer ${this.githubToken}` },
-        { key: 'Content-Type', value: 'application/json' }
-      ];
-
-      const contentResponse = await this.httpClient.SendAsync(this.request);
+      const contentResponse = await this.httpClient.SendAsync(this.getGitHubApiRequest());
 
       if (contentResponse.IsSuccessStatusCode) {
         this.repositoryIssues = JSON.parse(contentResponse.Content);
@@ -104,6 +94,18 @@ export class HomeComponent extends BaseComponent {
         this.refreshComponent();
       }
     }
+  }
+
+  private getGitHubApiRequest = (): HttpRequestMessage => {
+    const request = new HttpRequestMessage(HttpMethod.POST);
+    request.RequestUri = 'https://api.github.com/graphql';
+    request.Content = JSON.stringify({query: graphQlQuery(5, IssueStatus.Closed)});
+    request.Headers = [
+      { key: 'Authorization', value: `Bearer ${this.githubToken}` },
+      { key: 'Content-Type', value: 'application/json' }
+    ];
+
+    return request;
   }
 
   private inputValid = (): boolean => {
