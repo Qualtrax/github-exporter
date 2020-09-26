@@ -1,10 +1,10 @@
-import { HomeComponent } from './main-page';
+import { MainPageComponent } from './main-page';
 
 describe('HomeComponent', () => {
-  let componentUnderTest: HomeComponent;
+  let componentUnderTest: MainPageComponent;
 
   beforeEach(() => {
-    componentUnderTest = new HomeComponent();
+    componentUnderTest = new MainPageComponent();
   });
 
   it('should construct', () => {

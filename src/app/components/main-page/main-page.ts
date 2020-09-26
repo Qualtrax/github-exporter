@@ -1,17 +1,18 @@
 import { Queryable, Strings, HttpClient, HttpRequestMessage, HttpMethod } from 'tsbase';
 import { Component, BaseComponent, SeoService, Html, DomEventTypes, DataBind } from 'tsbase-components';
 import { Issue, RepositoryIssues, Comment } from '../../domain/GitHubDataTypes';
-import { HtmlValidations } from '../../enums/HtmlValidations';
+import { Classes, HtmlValidation, Images } from '../../enums/module';
 import { graphQlQuery, IssueStatus } from './GraphQlQuery';
 
 const ids = {
   submitButton: 'submitButton',
   githubToken: 'githubToken',
-  form: 'form'
+  form: 'form',
+  loadingGifWrapper: 'loadingGifWrapper'
 };
 
 @Component({ selector: 'main-page', route: '/' })
-export class HomeComponent extends BaseComponent {
+export class MainPageComponent extends BaseComponent {
   @DataBind githubToken!: string;
   private repositoryIssues: RepositoryIssues | null = null;
 
@@ -33,13 +34,17 @@ export class HomeComponent extends BaseComponent {
         <input id="${ids.githubToken}"
           type="text"
           placeholder="GitHub auth token"
-          ${HtmlValidations.required}>
+          ${HtmlValidation.Required}>
       </div>
 
       <button id="${ids.submitButton}">Submit</button>
     </form>
 
     <hr>
+
+    <div id="${ids.loadingGifWrapper}" class="${Classes.Hidden}">
+      <img src="${Images.LoadingGif}" alt="Loading icon">
+    </div>
 
     ${this.repositoryIssues ? /*html*/ `
     <h2>Response</h2>
@@ -84,6 +89,8 @@ export class HomeComponent extends BaseComponent {
     if (event && this.inputValid()) {
       event.preventDefault();
 
+      this.showLoadingGif();
+
       const contentResponse = await this.httpClient.SendAsync(this.getGitHubApiRequest());
 
       if (contentResponse.IsSuccessStatusCode) {
@@ -99,7 +106,7 @@ export class HomeComponent extends BaseComponent {
   private getGitHubApiRequest = (): HttpRequestMessage => {
     const request = new HttpRequestMessage(HttpMethod.POST);
     request.RequestUri = 'https://api.github.com/graphql';
-    request.Content = JSON.stringify({query: graphQlQuery(5, IssueStatus.Closed)});
+    request.Content = JSON.stringify({query: graphQlQuery(100, IssueStatus.Closed)});
     request.Headers = [
       { key: 'Authorization', value: `Bearer ${this.githubToken}` },
       { key: 'Content-Type', value: 'application/json' }
@@ -110,5 +117,10 @@ export class HomeComponent extends BaseComponent {
 
   private inputValid = (): boolean => {
     return !Strings.IsEmptyOrWhiteSpace(this.githubToken);
+  }
+
+  private showLoadingGif() {
+    const loadingGifWrapper = this.Dom.getElementById(ids.loadingGifWrapper) as HTMLDivElement;
+    loadingGifWrapper.classList.remove('hidden');
   }
 }
