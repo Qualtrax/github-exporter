@@ -1,8 +1,6 @@
 import { Router } from 'tsbase-components/routing/Router/Router';
 import { BaseComponent } from 'tsbase-components/components/base-component/base-component';
-import './core/core';
-import './shared/shared';
-import './pages/page';
+import './components/components';
 import { App } from './App';
 
 (() => {

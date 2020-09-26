@@ -12,11 +12,8 @@ export class App {
   public EnvironmentVariables = new Map<string, string>();
 
   private constructor(public Router: IRouter) {
-    if (App.environment === Environments.Production) {
-      this.EnvironmentVariables = ProductionEnvironmentVariables;
-    } else {
-      this.EnvironmentVariables = DevelopmentEnvironmentVariables;
-    }
+    this.EnvironmentVariables = App.environment === Environments.Production ?
+      ProductionEnvironmentVariables : DevelopmentEnvironmentVariables;
   }
 
   public static Instance(environment?: string, router: IRouter = Router.Instance): App {
@@ -33,8 +30,7 @@ export class App {
   public Startup(router: IRouter = Router.Instance): void {
     const main = document.querySelector('main');
     if (router && main) {
-      router.Start(main, 'tsb-not-found');
-      router.RouteTo('/', false);
+      router.Start(main, 'main-page');
     }
   }
 }

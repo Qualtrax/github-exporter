@@ -1,8 +1,19 @@
 @import './skeleton/normalize';
 @import './skeleton/skeleton';
 @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,600');
+@import './sass.scss';
+@import './classes.scss';
 
-@import './base/base.scss';
-@import '../core/core.scss';
-@import '../shared/shared.scss';
-@import '../pages/pages.scss';
+/* === FRAMEWORK DEPENDENCY DON'T REMOVE === */
+.tsbase-component {
+  display: initial !important;
+}
+/* ========================================= */
+
+@media (min-width: $tablet) {
+}
+
+@media (min-width: $desktop) {
+}
+
+@import '../components/components.scss';

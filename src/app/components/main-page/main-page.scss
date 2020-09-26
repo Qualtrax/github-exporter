@@ -1,11 +1,6 @@
 @import '../../scss/sass.scss';
 
-.home-component {
-
-  ul {
-    padding-left: 40px;
-    list-style: circle;
-  }
+.main-page-component {
 
   @media (min-width: $tablet) {
 

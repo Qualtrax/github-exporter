@@ -1,10 +1,10 @@
-import { FooterComponent } from './tsb-footer';
+import { HomeComponent } from './main-page';
 
-describe('FooterComponent', () => {
-  let componentUnderTest: FooterComponent;
+describe('HomeComponent', () => {
+  let componentUnderTest: HomeComponent;
 
   beforeEach(() => {
-    componentUnderTest = new FooterComponent();
+    componentUnderTest = new HomeComponent();
   });
 
   it('should construct', () => {

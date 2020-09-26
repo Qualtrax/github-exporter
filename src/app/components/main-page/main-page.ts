@@ -1,6 +1,6 @@
 import { Queryable, Strings, HttpClient, HttpRequestMessage, HttpMethod } from 'tsbase';
 import { Component, BaseComponent, SeoService, Html, DomEventTypes, DataBind } from 'tsbase-components';
-import { Issue, RepositoryIssues, Comment } from './GitHubDataTypes';
+import { Issue, RepositoryIssues, Comment } from '../../domain/GitHubDataTypes';
 import { graphQlQuery, IssueStatus } from './GraphQlQuery';
 
 const ids = {
@@ -9,7 +9,7 @@ const ids = {
   form: 'form'
 };
 
-@Component({ selector: 'tsb-home', route: '/' })
+@Component({ selector: 'main-page', route: '/' })
 export class HomeComponent extends BaseComponent {
   @DataBind githubToken!: string;
   private repositoryIssues: RepositoryIssues | null = null;
@@ -28,7 +28,7 @@ export class HomeComponent extends BaseComponent {
   }
 
   protected template = (): string => /*html*/ `
-  <div class="home-component">
+  <div class="main-page-component">
     <h1>GitHub Exporter</h1>
     <h2>Request</h2>
 
