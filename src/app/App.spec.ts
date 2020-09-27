@@ -1,6 +1,6 @@
 import { Mock } from 'tsmockit';
 import { IRouter } from 'tsbase-components/routing/Router/IRouter';
-import { Environments, EnvironmentVariables } from './environments/Environments';
+import { Environments, EnvironmentVariables } from './Environments';
 import { App } from './App';
 
 describe('App', () => {

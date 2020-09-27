@@ -14,6 +14,8 @@ Ensure you have [node/npm](https://nodejs.org/en/) installed.
   - compile TypeScript into a JavaScript bundle
   - serve the site using http-server at: [http://localhost:4200/](http://localhost:4200/)
 
+***May need to use gitbash to run this ^ command due to 'cp' usage***
+
 ### Testing / linting
 
 - Run `npm test` to watch all tests

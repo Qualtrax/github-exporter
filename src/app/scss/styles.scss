@@ -2,7 +2,6 @@
 @import './skeleton/skeleton';
 @import url('https://fonts.googleapis.com/css?family=Raleway:400,300,600');
 @import './sass.scss';
-@import './classes.scss';
 
 /* === FRAMEWORK DEPENDENCY DON'T REMOVE === */
 .tsbase-component {
@@ -10,10 +9,40 @@
 }
 /* ========================================= */
 
+ul {
+  list-style: none;
+}
+
+input {
+  width: 50%;
+}
+
+.layout {
+  width: 100vw;
+  display: grid;
+  grid-template-areas: 'nav main main main main';
+
+  nav-component {
+    grid-area: nav;
+    width: 20vw;
+    min-width: 200px;
+  }
+
+  main {
+    grid-area: main;
+    padding-left: 40px;
+    padding-top: 20px;
+    width: calc(80vw - 40px);
+    height: calc(100vh - 20px);
+    overflow-y: auto;
+  }
+}
+
 @media (min-width: $tablet) {
 }
 
 @media (min-width: $desktop) {
 }
 
+@import './classes.scss';
 @import '../components/components.scss';

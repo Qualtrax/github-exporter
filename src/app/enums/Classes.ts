@@ -1,3 +1,4 @@
 export enum Classes {
-  Hidden = 'hidden'
+  Hidden = 'hidden',
+  NavLink = 'nav-link'
 }

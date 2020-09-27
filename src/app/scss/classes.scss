@@ -4,6 +4,21 @@
   display: none !important;
 }
 
+.nav-link {
+  @include rem(font-size, 24px);
+  text-decoration: none;
+  color: $dark-grey;
+
+  div {
+    display: flex;
+    align-items: center;
+
+    span {
+      margin-left: 10px;
+    }
+  }
+}
+
 @media (min-width: $tablet) {
 
 }

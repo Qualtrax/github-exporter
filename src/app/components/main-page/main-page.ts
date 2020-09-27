@@ -2,6 +2,8 @@ import { Queryable, Strings, HttpClient, HttpRequestMessage, HttpMethod } from '
 import { Component, BaseComponent, SeoService, Html, DomEventTypes, DataBind } from 'tsbase-components';
 import { Issue, RepositoryIssues, Comment } from '../../domain/GitHubDataTypes';
 import { Classes, HtmlValidation, Images } from '../../enums/module';
+import { Settings } from '../../enums/Settings';
+import { SettingsService } from '../../services/file-system/SettingsService';
 import { graphQlQuery, IssueStatus } from './GraphQlQuery';
 
 const ids = {
@@ -15,9 +17,16 @@ const ids = {
 export class MainPageComponent extends BaseComponent {
   @DataBind githubToken!: string;
   private repositoryIssues: RepositoryIssues | null = null;
+  private persistedGithubAuthToken: string;
 
-  constructor(private httpClient = new HttpClient()) {
+  constructor(
+    private httpClient = new HttpClient(),
+    private settingsRepository = SettingsService.Instance.Repository
+  ) {
     super();
+
+    const githubAuthTokenSetting = this.settingsRepository.Find(r => r.key === Settings.GitHubAuthToken);
+    this.persistedGithubAuthToken = githubAuthTokenSetting ? githubAuthTokenSetting.value : Strings.Empty;
   }
 
   protected onInit = async (): Promise<void> => {
@@ -31,10 +40,11 @@ export class MainPageComponent extends BaseComponent {
 
     <form id="${ids.form}">
       <div>
+        <label for="${ids.githubToken}">GitHub Auth Token</label>
         <input id="${ids.githubToken}"
-          type="text"
-          placeholder="GitHub auth token"
-          ${HtmlValidation.Required}>
+          type="password"
+          ${HtmlValidation.Required}
+          value="${this.persistedGithubAuthToken}">
       </div>
 
       <button id="${ids.submitButton}">Submit</button>

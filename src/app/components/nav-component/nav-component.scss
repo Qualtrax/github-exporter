@@ -1,0 +1,26 @@
+@import '../../scss/sass.scss';
+
+.nav-component {
+  height: 100vh;
+  background-color: $light-grey;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  ul {
+    list-style: none;
+
+    li {
+      padding-top: 20px;
+      padding-left: 10px;
+    }
+  }
+
+  @media (min-width: $tablet) {
+
+  }
+
+  @media (min-width: $desktop) {
+
+  }
+}

@@ -1,20 +1,17 @@
-import { HttpClient, HttpRequestMessage, HttpResponseMessage, KeyValue, Repository, Strings } from 'tsbase';
+import { KeyValue, Repository, Strings } from 'tsbase';
 import { Mock } from 'tsmockit';
-import { MainPageComponent } from './main-page';
+import { SettingsPageComponent } from './settings-page';
 
-describe('HomeComponent', () => {
-  const mockHttpClient = new Mock<HttpClient>();
+describe('SettingsPageComponent', () => {
   const mockSettingsRepository = new Mock<Repository<KeyValue>>();
-  let componentUnderTest: MainPageComponent;
+  let componentUnderTest: SettingsPageComponent;
 
   beforeEach(() => {
-    mockHttpClient.Setup(c => c.SendAsync(
-      new HttpRequestMessage()), new HttpResponseMessage(Strings.Empty, { Code: 200, Text: 'OK' }));
     mockSettingsRepository.Setup(r => r.Add({ key: Strings.Empty, value: Strings.Empty }));
     mockSettingsRepository.Setup(r => r.Find(() => true), null);
     mockSettingsRepository.Setup(r => r.SaveChanges());
 
-    componentUnderTest = new MainPageComponent(mockHttpClient.Object, mockSettingsRepository.Object);
+    componentUnderTest = new SettingsPageComponent(mockSettingsRepository.Object);
   });
 
   it('should construct', () => {
@@ -26,5 +23,4 @@ describe('HomeComponent', () => {
     const content = (componentUnderTest.shadowRoot as ShadowRoot).innerHTML;
     expect(content).toBeDefined();
   });
-
 });

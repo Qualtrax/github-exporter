@@ -1,10 +1,6 @@
 import { IRouter } from 'tsbase-components/routing/Router/IRouter';
 import { Router } from 'tsbase-components/routing/Router/Router';
-import {
-  Environments,
-  DevelopmentEnvironmentVariables,
-  ProductionEnvironmentVariables
-} from './environments/Environments';
+import { Environments, DevelopmentEnvironmentVariables, ProductionEnvironmentVariables } from './Environments';
 
 export class App {
   private static instance: App | null = null;
