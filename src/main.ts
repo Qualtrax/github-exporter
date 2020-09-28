@@ -7,6 +7,7 @@ let mainWindow: Electron.BrowserWindow;
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    icon: 'images/favicon.png',
     height: 600,
     width: 800
   });
@@ -16,7 +17,7 @@ function createWindow() {
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    // Dereference the window object, usually you would store windows
+    // De-reference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null as unknown as any;

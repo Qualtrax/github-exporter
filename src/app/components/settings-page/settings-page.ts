@@ -1,19 +1,26 @@
-import { KeyValue, Strings } from 'tsbase';
-import { Component, BaseComponent, SeoService, Html, DomEventTypes } from 'tsbase-components';
+/* eslint-disable max-len */
+import { Strings } from 'tsbase';
+import { Component, BaseComponent, SeoService, DomEventTypes } from 'tsbase-components';
+import { IssueStatus } from '../../enums/module';
 import { Settings } from '../../enums/Settings';
 import { SettingsService } from '../../services/file-system/SettingsService';
 
 const ids = {
-  saveButton: 'saveButton'
+  saveButton: 'saveButton',
+  paginationSliderLabel: 'paginationSliderLabel'
 };
 
 @Component({ selector: 'settings-page', route: '/settings' })
 export class SettingsPageComponent extends BaseComponent {
-  private settings: Array<KeyValue> = [
-    { key: Settings.GitHubAuthToken, value: 'GitHub Auth Token' }
-  ];
+  private settingsMap = new Map<string, string>([
+    [Settings.GitHubAuthToken, 'GitHub Auth Token' ],
+    [Settings.IssueStatus, 'Issue Status' ],
+    [Settings.PaginationCount, 'Pagination Count'],
+    [Settings.RepositoryName, 'Repository Name'],
+    [Settings.RepositoryOwner, 'Repository Owner']
+  ]);
 
-  constructor(private settingsRepository = SettingsService.Instance.Repository) {
+  constructor(private settingsRepository = SettingsService.Instance().Repository) {
     super();
   }
 
@@ -26,11 +33,37 @@ export class SettingsPageComponent extends BaseComponent {
     <h1>Settings</h1>
 
     <ul>
-      ${Html.ForEach(this.settings, (setting: KeyValue) => /*html*/ `
       <li>
-        <label for="${setting.key}">${setting.value}</label>
-        <input id="${setting.key}" type="text" value="${this.getSettingValue(setting.key)}">
-      </li>`)}
+        <label for="${Settings.GitHubAuthToken}">${this.settingsMap.get(Settings.GitHubAuthToken)}</label>
+        <input id="${Settings.GitHubAuthToken}" type="text" value="${this.getSettingValue(Settings.GitHubAuthToken)}">
+      </li>
+
+      <li>
+        <label for="${Settings.RepositoryOwner}">${this.settingsMap.get(Settings.RepositoryOwner)}</label>
+        <input id="${Settings.RepositoryOwner}" type="text" value="${this.getSettingValue(Settings.RepositoryOwner)}">
+      </li>
+
+      <li>
+        <label for="${Settings.RepositoryName}">${this.settingsMap.get(Settings.RepositoryName)}</label>
+        <input id="${Settings.RepositoryName}" type="text" value="${this.getSettingValue(Settings.RepositoryName)}">
+      </li>
+
+      <li>
+        <label for="${Settings.IssueStatus}">${this.settingsMap.get(Settings.IssueStatus)}</label>
+        <select id="${Settings.IssueStatus}" value="${this.getSettingValue(Settings.IssueStatus)}">
+          <option value="${IssueStatus.Open}"
+            ${this.getSettingValue(Settings.IssueStatus) === IssueStatus.Open ? 'selected="selected"' : Strings.Empty}>${IssueStatus.Open}</option>
+
+          <option value="${IssueStatus.Closed}"
+            ${this.getSettingValue(Settings.IssueStatus) === IssueStatus.Closed ? 'selected="selected"' : Strings.Empty}>${IssueStatus.Closed}</option>
+        </select>
+      </li>
+
+      <li>
+        <label for="${Settings.PaginationCount}">${this.settingsMap.get(Settings.PaginationCount)} | <span id="${ids.paginationSliderLabel}">${this.getSettingValue(Settings.PaginationCount)}</span></label>
+        <input id="${Settings.PaginationCount}" value="${this.getSettingValue(Settings.PaginationCount)}"
+          type="range" min="1" max="100">
+      </li>
     </ul>
 
     <button id="${ids.saveButton}">Save Changes</button>
@@ -38,6 +71,12 @@ export class SettingsPageComponent extends BaseComponent {
   `;
 
   protected onPostRender = (): void => {
+    this.addEventListenerToElementId(Settings.PaginationCount, DomEventTypes.Change, () => {
+      const paginationSliderLabel = this.Dom.getElementById(ids.paginationSliderLabel) as HTMLSpanElement;
+      const paginationValue = (this.Dom.getElementById(Settings.PaginationCount) as HTMLInputElement).value;
+      paginationSliderLabel.innerText = paginationValue;
+    });
+
     this.addEventListenerToElementId(ids.saveButton, DomEventTypes.Click, () => {
       this.updateSettings();
 
@@ -57,14 +96,16 @@ export class SettingsPageComponent extends BaseComponent {
   }
 
   private updateSettings = () => {
-    this.settings.forEach(setting => {
-      const settingInput = this.Dom.getElementById(setting.key) as HTMLInputElement;
-      const persistedSetting = this.settingsRepository.Find(s => s.key === setting.key);
+    for (const setting of this.settingsMap) {
+      const key = setting[0];
+
+      const settingInput = this.Dom.getElementById(key) as HTMLInputElement;
+      const persistedSetting = this.settingsRepository.Find(s => s.key === key);
       if (persistedSetting) {
         persistedSetting.value = settingInput.value;
       } else {
-        this.settingsRepository.Add({ key: setting.key, value: settingInput.value });
+        this.settingsRepository.Add({ key: key, value: settingInput.value });
       }
-    });
+    }
   }
 }

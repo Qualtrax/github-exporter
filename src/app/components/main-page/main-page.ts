@@ -1,53 +1,38 @@
-import { Queryable, Strings, HttpClient, HttpRequestMessage, HttpMethod } from 'tsbase';
-import { Component, BaseComponent, SeoService, Html, DomEventTypes, DataBind } from 'tsbase-components';
-import { Issue, RepositoryIssues, Comment } from '../../domain/GitHubDataTypes';
-import { Classes, HtmlValidation, Images } from '../../enums/module';
-import { Settings } from '../../enums/Settings';
-import { SettingsService } from '../../services/file-system/SettingsService';
-import { graphQlQuery, IssueStatus } from './GraphQlQuery';
+import { Queryable, Strings } from 'tsbase';
+import { Component, BaseComponent, SeoService, Html, DomEventTypes } from 'tsbase-components';
+import { Issue, RepositoryIssues, Comment, Error } from '../../domain/GitHubDataTypes';
+import { Classes, Images, Routes } from '../../enums/module';
+import { GitHubQueryService, IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
 
 const ids = {
   submitButton: 'submitButton',
-  githubToken: 'githubToken',
   form: 'form',
   loadingGifWrapper: 'loadingGifWrapper'
 };
 
 @Component({ selector: 'main-page', route: '/' })
 export class MainPageComponent extends BaseComponent {
-  @DataBind githubToken!: string;
   private repositoryIssues: RepositoryIssues | null = null;
-  private persistedGithubAuthToken: string;
+  private errors: Array<Error> | null = null;
+  private pageTitle = 'GitHub Exporter';
 
   constructor(
-    private httpClient = new HttpClient(),
-    private settingsRepository = SettingsService.Instance.Repository
+    private gitHubQueryService: IGitHubQueryService = GitHubQueryService.Instance()
   ) {
     super();
-
-    const githubAuthTokenSetting = this.settingsRepository.Find(r => r.key === Settings.GitHubAuthToken);
-    this.persistedGithubAuthToken = githubAuthTokenSetting ? githubAuthTokenSetting.value : Strings.Empty;
   }
 
   protected onInit = async (): Promise<void> => {
-    SeoService.Instance.SetDefaultTags('GitHub Exporter');
+    SeoService.Instance.SetDefaultTags(this.pageTitle);
   }
 
   protected template = (): string => /*html*/ `
   <div class="main-page-component">
-    <h1>GitHub Exporter</h1>
+    <h1>${this.pageTitle}</h1>
     <h2>Request</h2>
 
     <form id="${ids.form}">
-      <div>
-        <label for="${ids.githubToken}">GitHub Auth Token</label>
-        <input id="${ids.githubToken}"
-          type="password"
-          ${HtmlValidation.Required}
-          value="${this.persistedGithubAuthToken}">
-      </div>
-
-      <button id="${ids.submitButton}">Submit</button>
+      <button id="${ids.submitButton}">Start Export</button>
     </form>
 
     <hr>
@@ -56,16 +41,25 @@ export class MainPageComponent extends BaseComponent {
       <img src="${Images.LoadingGif}" alt="Loading icon">
     </div>
 
-    ${this.repositoryIssues ? /*html*/ `
+    ${this.repositoryIssues || this.errors ? /*html*/ `
     <h2>Response</h2>
+
+    ${this.repositoryIssues ? this.repositoryIssuesResponse(this.repositoryIssues) : Strings.Empty}
+    ${this.errors ? this.repositoryIssuesErrors(this.errors) : Strings.Empty}
+
+    ` : Strings.Empty}
+  </div>
+  `;
+
+  private repositoryIssuesResponse = (responseData: RepositoryIssues): string => /*html*/ `
     <h3>Metadata</h3>
-    <p>Has Previous Page: ${this.repositoryIssues.data.repository.issues.pageInfo.hasPreviousPage}</p>
-    <p>Has Next Page: ${this.repositoryIssues.data.repository.issues.pageInfo.hasNextPage}</p>
-    <p>Last Edge (cursor): ${Queryable.From(this.repositoryIssues.data.repository.issues.edges).Last()?.cursor}</p>
+    <p>Has Previous Page: ${responseData.data.repository.issues.pageInfo.hasPreviousPage}</p>
+    <p>Has Next Page: ${responseData.data.repository.issues.pageInfo.hasNextPage}</p>
+    <p>Last Edge (cursor): ${Queryable.From(responseData.data.repository.issues.edges).Last()?.cursor}</p>
 
     <h3>Closed Issues</h3>
     <ul>
-    ${Html.ForEach(this.repositoryIssues.data.repository.issues.nodes, (issue: Issue) => /*html*/ `
+    ${Html.ForEach(responseData.data.repository.issues.nodes, (issue: Issue) => /*html*/ `
       <li>
         <h4>${issue.number} | ${issue.title}</h4>
         <p>Opened at: ${issue.createdAt}</p>
@@ -84,11 +78,16 @@ export class MainPageComponent extends BaseComponent {
         </ul>
       </li>
     `)}
-    </ul>
+    </ul>`;
 
-    ` : Strings.Empty}
-  </div>
-  `;
+  private repositoryIssuesErrors = (errors: Array<Error>): string => /*html*/ `
+  <h3>Errors</h3>
+  <ul>
+    ${Html.ForEach(errors, (error: Error) => /*html*/ `
+    <li>${error.message}</li>`)}
+  </ul>
+
+  <p>Adjust your <router-link route="${Routes.Settings}">Settings</router-link> to resolve the above error(s).</p>`;
 
   protected onPostRender = async () => {
     this.addEventListenerToElementId(ids.submitButton, DomEventTypes.Click, this.onSubmissionAttempted);
@@ -96,37 +95,23 @@ export class MainPageComponent extends BaseComponent {
   }
 
   private onSubmissionAttempted = async (event: Event | null): Promise<any> => {
-    if (event && this.inputValid()) {
+    if (event) {
       event.preventDefault();
 
       this.showLoadingGif();
 
-      const contentResponse = await this.httpClient.SendAsync(this.getGitHubApiRequest());
+      const contentResponse = await this.gitHubQueryService.GetApiResults();
 
       if (contentResponse.IsSuccessStatusCode) {
-        this.repositoryIssues = JSON.parse(contentResponse.Content);
+        const json = JSON.parse(contentResponse.Content);
+        json.errors ? this.errors = json.errors : this.repositoryIssues = json;
+
         this.refreshComponent();
       } else {
         alert(contentResponse.Content);
         this.refreshComponent();
       }
     }
-  }
-
-  private getGitHubApiRequest = (): HttpRequestMessage => {
-    const request = new HttpRequestMessage(HttpMethod.POST);
-    request.RequestUri = 'https://api.github.com/graphql';
-    request.Content = JSON.stringify({query: graphQlQuery(100, IssueStatus.Closed)});
-    request.Headers = [
-      { key: 'Authorization', value: `Bearer ${this.githubToken}` },
-      { key: 'Content-Type', value: 'application/json' }
-    ];
-
-    return request;
-  }
-
-  private inputValid = (): boolean => {
-    return !Strings.IsEmptyOrWhiteSpace(this.githubToken);
   }
 
   private showLoadingGif() {

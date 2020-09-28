@@ -36,3 +36,7 @@ export type Comment = {
   createdAt: string,
   bodyText: string
 }
+
+export type Error = {
+  message: string
+}

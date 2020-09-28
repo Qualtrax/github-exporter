@@ -1,3 +1,7 @@
 export enum Settings {
-  GitHubAuthToken = 'githubAuthToken'
+  GitHubAuthToken = 'githubAuthToken',
+  IssueStatus = 'issueStatus',
+  PaginationCount = 'paginationCount',
+  RepositoryName = 'repositoryName',
+  RepositoryOwner = 'repositoryOwner'
 }
