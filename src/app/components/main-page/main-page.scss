@@ -2,6 +2,17 @@
 
 .main-page-component {
 
+  ul {
+
+    li {
+      &.issue-item,
+      &.comment-item {
+        padding: 10px;
+        border: 1px solid grey;
+      }
+    }
+  }
+
   @media (min-width: $tablet) {
 
   }

@@ -72,6 +72,7 @@ export class GitHubQueryService implements IGitHubQueryService {
             closedAt,
             number,
             title,
+            bodyHTML,
             labels (first: ${this.getSettingOrDefault(Settings.PaginationCount)}) {
               nodes {name}
             },
@@ -81,7 +82,7 @@ export class GitHubQueryService implements IGitHubQueryService {
                   login
                 },
                 createdAt,
-                bodyText
+                bodyHTML
               }
             }
           },

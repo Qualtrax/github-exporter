@@ -21,6 +21,7 @@ export type Issue = {
   closedAt: string,
   number: number,
   title: string,
+  bodyHTML: string,
   labels: {
     nodes: Array<{name: string}>
   }
@@ -34,7 +35,7 @@ export type Comment = {
     login: string
   },
   createdAt: string,
-  bodyText: string
+  bodyHTML: string
 }
 
 export type Error = {

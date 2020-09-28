@@ -57,23 +57,24 @@ export class MainPageComponent extends BaseComponent {
     <p>Has Next Page: ${responseData.data.repository.issues.pageInfo.hasNextPage}</p>
     <p>Last Edge (cursor): ${Queryable.From(responseData.data.repository.issues.edges).Last()?.cursor}</p>
 
-    <h3>Closed Issues</h3>
+    <h3>Issues</h3>
     <ul>
     ${Html.ForEach(responseData.data.repository.issues.nodes, (issue: Issue) => /*html*/ `
-      <li>
+      <li class="issue-item">
         <h4>${issue.number} | ${issue.title}</h4>
         <p>Opened at: ${issue.createdAt}</p>
         <p>Closed at: ${issue.closedAt}</p>
         <p>Labels: ${Html.ForEach(issue.labels.nodes, (label: {name: string}) => /*html*/ `
           <span>${label.name}</span>,`)}</p>
+        <p>Description: ${issue.bodyHTML}</p>
 
         <h5>Comments</h5>
         <ul>
           ${Html.ForEach(issue.comments.nodes, (comment: Comment) => /*html*/ `
-          <li>
+          <li class="comment-item">
             <p>${comment.author.login}</p>
             <p>${comment.createdAt}</p>
-            <blockquote>${comment.bodyText}</blockquote>
+            <blockquote>${comment.bodyHTML}</blockquote>
           </li>`)}
         </ul>
       </li>
@@ -105,12 +106,11 @@ export class MainPageComponent extends BaseComponent {
       if (contentResponse.IsSuccessStatusCode) {
         const json = JSON.parse(contentResponse.Content);
         json.errors ? this.errors = json.errors : this.repositoryIssues = json;
-
-        this.refreshComponent();
       } else {
         alert(contentResponse.Content);
-        this.refreshComponent();
       }
+
+      this.refreshComponent();
     }
   }
 
