@@ -16,7 +16,7 @@ const ids = {
 export class MainPageComponent extends BaseComponent {
   private githubExport: GitHubExport | null = null;
   private errors: Array<string> | null = null;
-  private pageTitle = 'GitHub Issue Exporter';
+  private pageTitle = 'Issue Exporter';
 
   constructor(
     private gitHubQueryService: IGitHubQueryService = GitHubQueryService.Instance(),
@@ -48,7 +48,7 @@ export class MainPageComponent extends BaseComponent {
     <h2>Response</h2>
 
     ${this.githubExport ? /*html*/ `
-    <p>${this.githubExport.repository.issues.length} issues exported!</p>
+    <p>${this.githubExport.repository.issues.length + this.githubExport.repository.pullRequests.length} issues exported!</p>
     <button id="${ids.downloadExportButton}">Download</button>` : Strings.Empty}
 
     ${this.errors ? this.repositoryIssuesErrors(this.errors) : Strings.Empty}

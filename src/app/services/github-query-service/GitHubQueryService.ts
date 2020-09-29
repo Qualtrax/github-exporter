@@ -4,7 +4,7 @@ import {
   Repository, Strings } from 'tsbase';
 import { Issue, RepositoryIssues } from '../../domain/GitHubDataTypes';
 import { GitHubExport } from '../../domain/GitHubExport';
-import { Settings, SettingsMap } from '../../enums/module';
+import { IssueType, Settings, SettingsMap } from '../../enums/module';
 import { SettingsService } from '../file-system/SettingsService';
 
 export interface IGitHubQueryService {
@@ -31,8 +31,10 @@ export class GitHubQueryService implements IGitHubQueryService {
 
   public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
     const gitHubExport: GitHubExport = { repository: {
-      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}`,
-      issues: new Array<Issue>()
+      // eslint-disable-next-line max-len
+      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueType)}`,
+      issues: new Array<Issue>(),
+      pullRequests: new Array<Issue>()
     } };
     const result = new GenericResult<GitHubExport>(gitHubExport);
 
@@ -81,7 +83,9 @@ export class GitHubQueryService implements IGitHubQueryService {
       repository(
         name: "${this.getSettingOrDefault(Settings.RepositoryName)}",
         owner: "${this.getSettingOrDefault(Settings.RepositoryOwner)}") {
-        issues (filterBy: {states: ${this.getSettingOrDefault(Settings.IssueStatus)}},
+        ${this.getSettingOrDefault(Settings.IssueType)}(
+        ${this.getSettingOrDefault(Settings.IssueType) === IssueType.Issues ?
+      `filterBy: {states: ${this.getSettingOrDefault(Settings.IssueStatus)}},` : Strings.Empty}
           first: ${this.getSettingOrDefault(Settings.PaginationCount)}
           ${afterCursor ? `, after: "${afterCursor}"` : Strings.Empty}) {
           nodes {
@@ -127,14 +131,15 @@ export class GitHubQueryService implements IGitHubQueryService {
         result.AddError((error as Error).message);
       });
     } else {
+      const issueKey: IssueType.Issues | IssueType.PullRequests =
+        this.getSettingOrDefault(Settings.IssueType) as IssueType;
       const repositoryIssues = json as RepositoryIssues;
-      // eslint-disable-next-line no-console
-      console.log(repositoryIssues);
-      gitHubExport.repository.issues = gitHubExport.repository.issues.concat(
-        repositoryIssues.data.repository.issues.nodes);
 
-      repositoryIssues.data.repository.issues.pageInfo.hasNextPage ?
-        afterCursor = Queryable.From(repositoryIssues.data.repository.issues.edges).Last()?.cursor : null;
+      gitHubExport.repository[issueKey] = gitHubExport.repository[issueKey].concat(
+        repositoryIssues.data.repository[issueKey].nodes);
+
+      repositoryIssues.data.repository[issueKey].pageInfo.hasNextPage ?
+        afterCursor = Queryable.From(repositoryIssues.data.repository[issueKey].edges).Last()?.cursor : null;
     }
 
     return afterCursor;

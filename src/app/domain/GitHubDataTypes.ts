@@ -1,7 +1,8 @@
 export type RepositoryIssues = {
   data: {
     repository: {
-      issues: Issues
+      issues: Issues,
+      pullRequests: Issues
     }
   }
 }

@@ -2,7 +2,7 @@
 import { Strings } from 'tsbase';
 import { Component, BaseComponent, SeoService, DomEventTypes } from 'tsbase-components';
 import { IssueStatus } from '../../enums/module';
-import { Settings, SettingsMap } from '../../enums/Settings';
+import { IssueType, Settings, SettingsMap } from '../../enums/Settings';
 import { SettingsService } from '../../services/file-system/SettingsService';
 
 const ids = {
@@ -38,6 +38,17 @@ export class SettingsPageComponent extends BaseComponent {
       <li>
         <label for="${Settings.RepositoryName}">${SettingsMap.get(Settings.RepositoryName)?.label}</label>
         <input id="${Settings.RepositoryName}" type="text" value="${this.getSettingValue(Settings.RepositoryName)}">
+      </li>
+
+      <li>
+        <label for="${Settings.IssueType}">${SettingsMap.get(Settings.IssueType)?.label}</label>
+        <select id="${Settings.IssueType}" value="${this.getSettingValue(Settings.IssueType)}">
+          <option value="${IssueType.Issues}"
+            ${this.getSettingValue(Settings.IssueStatus) === IssueType.Issues ? 'selected="selected"' : Strings.Empty}>Issues</option>
+
+          <option value="${IssueType.PullRequests}"
+            ${this.getSettingValue(Settings.IssueStatus) === IssueType.PullRequests ? 'selected="selected"' : Strings.Empty}>Pull Requests</option>
+        </select>
       </li>
 
       <li>
