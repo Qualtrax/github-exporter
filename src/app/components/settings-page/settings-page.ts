@@ -2,7 +2,7 @@
 import { Strings } from 'tsbase';
 import { Component, BaseComponent, SeoService, DomEventTypes } from 'tsbase-components';
 import { IssueStatus } from '../../enums/module';
-import { Settings } from '../../enums/Settings';
+import { Settings, SettingsMap } from '../../enums/Settings';
 import { SettingsService } from '../../services/file-system/SettingsService';
 
 const ids = {
@@ -12,14 +12,6 @@ const ids = {
 
 @Component({ selector: 'settings-page', route: '/settings' })
 export class SettingsPageComponent extends BaseComponent {
-  private settingsMap = new Map<string, string>([
-    [Settings.GitHubAuthToken, 'GitHub Auth Token' ],
-    [Settings.IssueStatus, 'Issue Status' ],
-    [Settings.PaginationCount, 'Pagination Count'],
-    [Settings.RepositoryName, 'Repository Name'],
-    [Settings.RepositoryOwner, 'Repository Owner']
-  ]);
-
   constructor(private settingsRepository = SettingsService.Instance().Repository) {
     super();
   }
@@ -34,22 +26,22 @@ export class SettingsPageComponent extends BaseComponent {
 
     <ul>
       <li>
-        <label for="${Settings.GitHubAuthToken}">${this.settingsMap.get(Settings.GitHubAuthToken)}</label>
+        <label for="${Settings.GitHubAuthToken}">${SettingsMap.get(Settings.GitHubAuthToken)?.label}</label>
         <input id="${Settings.GitHubAuthToken}" type="text" value="${this.getSettingValue(Settings.GitHubAuthToken)}">
       </li>
 
       <li>
-        <label for="${Settings.RepositoryOwner}">${this.settingsMap.get(Settings.RepositoryOwner)}</label>
+        <label for="${Settings.RepositoryOwner}">${SettingsMap.get(Settings.RepositoryOwner)?.label}</label>
         <input id="${Settings.RepositoryOwner}" type="text" value="${this.getSettingValue(Settings.RepositoryOwner)}">
       </li>
 
       <li>
-        <label for="${Settings.RepositoryName}">${this.settingsMap.get(Settings.RepositoryName)}</label>
+        <label for="${Settings.RepositoryName}">${SettingsMap.get(Settings.RepositoryName)?.label}</label>
         <input id="${Settings.RepositoryName}" type="text" value="${this.getSettingValue(Settings.RepositoryName)}">
       </li>
 
       <li>
-        <label for="${Settings.IssueStatus}">${this.settingsMap.get(Settings.IssueStatus)}</label>
+        <label for="${Settings.IssueStatus}">${SettingsMap.get(Settings.IssueStatus)?.label}</label>
         <select id="${Settings.IssueStatus}" value="${this.getSettingValue(Settings.IssueStatus)}">
           <option value="${IssueStatus.Open}"
             ${this.getSettingValue(Settings.IssueStatus) === IssueStatus.Open ? 'selected="selected"' : Strings.Empty}>${IssueStatus.Open}</option>
@@ -60,7 +52,7 @@ export class SettingsPageComponent extends BaseComponent {
       </li>
 
       <li>
-        <label for="${Settings.PaginationCount}">${this.settingsMap.get(Settings.PaginationCount)} | <span id="${ids.paginationSliderLabel}">${this.getSettingValue(Settings.PaginationCount)}</span></label>
+        <label for="${Settings.PaginationCount}">${SettingsMap.get(Settings.PaginationCount)?.label} | <span id="${ids.paginationSliderLabel}">${this.getSettingValue(Settings.PaginationCount)}</span></label>
         <input id="${Settings.PaginationCount}" value="${this.getSettingValue(Settings.PaginationCount)}"
           type="range" min="1" max="100">
       </li>
@@ -96,7 +88,7 @@ export class SettingsPageComponent extends BaseComponent {
   }
 
   private updateSettings = () => {
-    for (const setting of this.settingsMap) {
+    for (const setting of SettingsMap) {
       const key = setting[0];
 
       const settingInput = this.Dom.getElementById(key) as HTMLInputElement;

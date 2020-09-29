@@ -1,6 +1,5 @@
 import { HttpClient, HttpMethod, HttpRequestMessage, HttpResponseMessage, KeyValue, Repository, Strings } from 'tsbase';
-import { IssueStatus } from '../../enums/GitHubApi';
-import { Settings } from '../../enums/module';
+import { Settings, SettingsMap } from '../../enums/module';
 import { SettingsService } from '../file-system/SettingsService';
 
 export interface IGitHubQueryService {
@@ -19,14 +18,6 @@ export class GitHubQueryService implements IGitHubQueryService {
     ));
   }
   public static Destroy(): void { this.instance = null; }
-
-  private defaultSettingsMap = new Map<string, string>([
-    [Settings.RepositoryName, ''],
-    [Settings.RepositoryOwner, ''],
-    [Settings.GitHubAuthToken, ''],
-    [Settings.PaginationCount, '100'],
-    [Settings.IssueStatus, IssueStatus.Open]
-  ]);
 
   private constructor(
     private httpClient: HttpClient,
@@ -55,7 +46,7 @@ export class GitHubQueryService implements IGitHubQueryService {
     const setting = this.settingsRepository.Find(s => s.key === settingName);
     return setting ?
       setting.value :
-      this.defaultSettingsMap.get(settingName) ||
+      SettingsMap.get(settingName)?.default ||
       Strings.Empty;
   }
 
