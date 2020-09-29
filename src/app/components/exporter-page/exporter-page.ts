@@ -12,8 +12,8 @@ const ids = {
   downloadExportButton: 'downloadExportButton'
 };
 
-@Component({ selector: 'main-page', route: '/' })
-export class MainPageComponent extends BaseComponent {
+@Component({ selector: 'exporter-page', route: '/' })
+export class ExporterPageComponent extends BaseComponent {
   private githubExport: GitHubExport | null = null;
   private errors: Array<string> | null = null;
   private pageTitle = 'Issue Exporter';
@@ -30,7 +30,7 @@ export class MainPageComponent extends BaseComponent {
   }
 
   protected template = (): string => /*html*/ `
-  <div class="main-page-component">
+  <div class="exporter-page-component">
     <h1>${this.pageTitle}</h1>
     <h2>Request</h2>
 

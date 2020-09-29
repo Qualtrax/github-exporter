@@ -26,7 +26,7 @@ export class App {
   public Startup(router: IRouter = Router.Instance): void {
     const main = document.querySelector('main');
     if (router && main) {
-      router.Start(main, 'main-page');
+      router.Start(main, 'exporter-page');
     }
   }
 }

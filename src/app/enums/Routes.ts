@@ -1,4 +1,4 @@
 export enum Routes {
-  MainPage = '/',
+  ExporterPage = '/',
   Settings = '/settings'
 }

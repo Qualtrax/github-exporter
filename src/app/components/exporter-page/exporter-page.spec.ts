@@ -2,17 +2,17 @@ import { Strings } from 'tsbase';
 import { Mock } from 'tsmockit';
 import { IDownloadService } from '../../services/file-system/DownloadService';
 import { IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
-import { MainPageComponent } from './main-page';
+import { ExporterPageComponent } from './exporter-page';
 
 describe('HomeComponent', () => {
   const mockGitHubQueryService = new Mock<IGitHubQueryService>();
   const mockDownloadService = new Mock<IDownloadService>();
-  let componentUnderTest: MainPageComponent;
+  let componentUnderTest: ExporterPageComponent;
 
   beforeEach(() => {
     mockDownloadService.Setup(s => s.DownloadFile(Strings.Empty, Strings.Empty));
 
-    componentUnderTest = new MainPageComponent(
+    componentUnderTest = new ExporterPageComponent(
       mockGitHubQueryService.Object,
       mockDownloadService.Object);
   });
