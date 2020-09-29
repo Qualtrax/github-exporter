@@ -32,7 +32,7 @@ export class GitHubQueryService implements IGitHubQueryService {
   public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
     const gitHubExport: GitHubExport = { repository: {
       // eslint-disable-next-line max-len
-      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueType)}`,
+      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueStatus)}/${this.getSettingOrDefault(Settings.IssueType)}`,
       issues: new Array<Issue>(),
       pullRequests: new Array<Issue>()
     } };
