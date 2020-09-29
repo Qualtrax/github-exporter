@@ -1,5 +1,5 @@
 export interface IDownloadService {
-  DownloadFile(fileContents: string, fileName: string): void;
+  DownloadFile(fileContents: any, fileName: string, fileType: string): void;
 }
 
 export class DownloadService implements IDownloadService {
@@ -9,8 +9,8 @@ export class DownloadService implements IDownloadService {
 
   private constructor() { }
 
-  public DownloadFile(file: any, fileName: string): void {
-    const blob = new Blob([file], { type: file.type });
+  public DownloadFile(fileContents: any, fileName: string, fileType: string): void {
+    const blob = new Blob([fileContents], { type: fileType });
     const link = document.createElement('a');
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);

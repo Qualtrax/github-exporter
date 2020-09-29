@@ -10,7 +10,7 @@ describe('HomeComponent', () => {
   let componentUnderTest: ExporterPageComponent;
 
   beforeEach(() => {
-    mockDownloadService.Setup(s => s.DownloadFile(Strings.Empty, Strings.Empty));
+    mockDownloadService.Setup(s => s.DownloadFile(Strings.Empty, Strings.Empty, Strings.Empty));
 
     componentUnderTest = new ExporterPageComponent(
       mockGitHubQueryService.Object,

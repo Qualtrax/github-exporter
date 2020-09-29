@@ -6,9 +6,9 @@ import { DownloadService, IDownloadService } from '../../services/file-system/Do
 import { FeedbackMessage, GitHubQueryService, IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
 
 const ids = {
-  submitButton: 'submitButton',
+  exportButton: 'submitButton',
   loadingGifWrapper: 'loadingGifWrapper',
-  downloadExportButton: 'downloadExportButton',
+  jsonDownloadButton: 'jsonDownloadButton',
   issuesDownloadedLabel: 'issuesDownloadedLabel',
   errorMessageLabel: 'errorMessageLabel'
 };
@@ -38,7 +38,7 @@ export class ExporterPageComponent extends BaseComponent {
   protected template = (): string => /*html*/ `
   <div class="exporter-page-component">
     <h1>${this.pageTitle}</h1>
-    <button id="${ids.submitButton}">Start Export</button>
+    <button id="${ids.exportButton}">Start Export</button>
 
     <hr>
 
@@ -53,7 +53,7 @@ export class ExporterPageComponent extends BaseComponent {
 
     ${this.githubExport ? /*html*/ `
     <p>${this.githubExport.repository.issues.length + this.githubExport.repository.pullRequests.length} issues exported!</p>
-    <button id="${ids.downloadExportButton}">Download</button>` : Strings.Empty}
+    <button id="${ids.jsonDownloadButton}">Raw JSON</button>` : Strings.Empty}
 
     ${this.errors ? this.repositoryIssuesErrors(this.errors) : Strings.Empty}
     ` : Strings.Empty}
@@ -70,30 +70,27 @@ export class ExporterPageComponent extends BaseComponent {
   <p>Adjust your <router-link route="${Routes.Settings}">Settings</router-link> to resolve the above error(s).</p>`;
 
   protected onPostRender = async () => {
-    this.addEventListenerToElementId(ids.submitButton, DomEventTypes.Click, this.onSubmissionAttempted);
-    this.addEventListenerToElementId(ids.downloadExportButton, DomEventTypes.Click, () => {
-      this.downloadService.DownloadFile(JSON.stringify(this.githubExport), `${this.githubExport?.repository.name}.json`);
+    this.addEventListenerToElementId(ids.exportButton, DomEventTypes.Click, this.onExportButtonClicked);
+    this.addEventListenerToElementId(ids.jsonDownloadButton, DomEventTypes.Click, () => {
+      this.downloadService.DownloadFile(JSON.stringify(this.githubExport), `${this.githubExport?.repository.name}.json`, 'json');
     });
   }
 
-  private onSubmissionAttempted = async (event: Event | null): Promise<any> => {
-    if (event) {
-      event.preventDefault();
-      this.showLoadingGif();
-      this.queryProgressRef = this.gitHubQueryService.QueryFeedback.Subscribe((feedback) => {
-        this.handleQueryFeedback(feedback);
-      });
+  private onExportButtonClicked = async (): Promise<any> => {
+    this.showLoadingGif();
+    this.queryProgressRef = this.gitHubQueryService.QueryFeedback.Subscribe((feedback) => {
+      this.handleQueryFeedback(feedback);
+    });
 
-      const result = await this.gitHubQueryService.GetApiResults();
+    const result = await this.gitHubQueryService.GetApiResults();
 
-      if (result.IsSuccess && result.Value) {
-        this.githubExport = result.Value;
-      } else {
-        this.errors = result.ErrorMessages;
-      }
-
-      this.refreshComponent();
+    if (result.IsSuccess && result.Value) {
+      this.githubExport = result.Value;
+    } else {
+      this.errors = result.ErrorMessages;
     }
+
+    this.refreshComponent();
   }
 
   private handleQueryFeedback(feedback: FeedbackMessage | undefined) {
