@@ -1,7 +1,7 @@
 import { Strings } from 'tsbase';
 import { Issue } from './GitHubDataTypes';
 
-export const WorkItemFields = [
+export const AzureWorkItemFields = [
   'Work Item Type', 'Title', 'Description', 'Tags','Created Date', 'Closed Date', 'Discussion'
 ];
 
@@ -21,15 +21,17 @@ export class AzureDevopsWorkItem {
 
   constructor(issue?: Issue) {
     if (issue) {
-      this.title = issue.title;
-      this.description = issue.bodyHTML;
+      this.title = this.minified(issue.title),
+      this.description = this.minified(issue.bodyHTML);
       this.tags = issue.labels.nodes.map(n => n.name).toString();
       this.createdDate = issue.createdAt;
       this.closedDate = issue.closedAt;
-      this.discussion = issue.comments.nodes.map(n => /*html*/ `
-<p>Author: ${n.author}</p>
-<p>Date: ${n.createdAt}</p>
-${n.bodyHTML}`).toString();
+      this.discussion = this.minified(issue.comments.nodes.map(n => /*html*/
+        (`<p>Author: ${n.author.login}</p><p>Date: ${n.createdAt}</p>${n.bodyHTML}`)).toString());
     }
+  }
+
+  private minified(string: string): string {
+    return JSON.stringify(string.replace(/,/g, '&#44;')).slice(1, -1);
   }
 }
