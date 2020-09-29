@@ -1,6 +1,7 @@
-import { Queryable, Strings } from 'tsbase';
+import { Strings } from 'tsbase';
 import { Component, BaseComponent, SeoService, Html, DomEventTypes } from 'tsbase-components';
-import { Issue, RepositoryIssues, Comment, Error } from '../../domain/GitHubDataTypes';
+import { Issue, Comment } from '../../domain/GitHubDataTypes';
+import { GitHubExport } from '../../domain/GitHubExport';
 import { Classes, Images, Routes } from '../../enums/module';
 import { GitHubQueryService, IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
 
@@ -12,8 +13,8 @@ const ids = {
 
 @Component({ selector: 'main-page', route: '/' })
 export class MainPageComponent extends BaseComponent {
-  private repositoryIssues: RepositoryIssues | null = null;
-  private errors: Array<Error> | null = null;
+  private githubExport: GitHubExport | null = null;
+  private errors: Array<string> | null = null;
   private pageTitle = 'GitHub Exporter';
 
   constructor(
@@ -41,25 +42,20 @@ export class MainPageComponent extends BaseComponent {
       <img src="${Images.LoadingGif}" alt="Loading icon">
     </div>
 
-    ${this.repositoryIssues || this.errors ? /*html*/ `
+    ${this.githubExport || this.errors ? /*html*/ `
     <h2>Response</h2>
 
-    ${this.repositoryIssues ? this.repositoryIssuesResponse(this.repositoryIssues) : Strings.Empty}
+    ${this.githubExport ? this.repositoryIssuesResponse(this.githubExport) : Strings.Empty}
     ${this.errors ? this.repositoryIssuesErrors(this.errors) : Strings.Empty}
 
     ` : Strings.Empty}
   </div>
   `;
 
-  private repositoryIssuesResponse = (responseData: RepositoryIssues): string => /*html*/ `
-    <h3>Metadata</h3>
-    <p>Has Previous Page: ${responseData.data.repository.issues.pageInfo.hasPreviousPage}</p>
-    <p>Has Next Page: ${responseData.data.repository.issues.pageInfo.hasNextPage}</p>
-    <p>Last Edge (cursor): ${Queryable.From(responseData.data.repository.issues.edges).Last()?.cursor}</p>
-
+  private repositoryIssuesResponse = (responseData: GitHubExport): string => /*html*/ `
     <h3>Issues</h3>
     <ul>
-    ${Html.ForEach(responseData.data.repository.issues.nodes, (issue: Issue) => /*html*/ `
+    ${Html.ForEach(responseData.repository.issues, (issue: Issue) => /*html*/ `
       <li class="issue-item">
         <h4>${issue.number} | ${issue.title}</h4>
         <p>Opened at: ${issue.createdAt}</p>
@@ -81,11 +77,11 @@ export class MainPageComponent extends BaseComponent {
     `)}
     </ul>`;
 
-  private repositoryIssuesErrors = (errors: Array<Error>): string => /*html*/ `
+  private repositoryIssuesErrors = (errors: Array<string>): string => /*html*/ `
   <h3>Errors</h3>
   <ul>
     ${Html.ForEach(errors, (error: Error) => /*html*/ `
-    <li>${error.message}</li>`)}
+    <li>${error}</li>`)}
   </ul>
 
   <p>Adjust your <router-link route="${Routes.Settings}">Settings</router-link> to resolve the above error(s).</p>`;
@@ -101,13 +97,12 @@ export class MainPageComponent extends BaseComponent {
 
       this.showLoadingGif();
 
-      const contentResponse = await this.gitHubQueryService.GetApiResults();
+      const result = await this.gitHubQueryService.GetApiResults();
 
-      if (contentResponse.IsSuccessStatusCode) {
-        const json = JSON.parse(contentResponse.Content);
-        json.errors ? this.errors = json.errors : this.repositoryIssues = json;
+      if (result.IsSuccess && result.Value) {
+        this.githubExport = result.Value;
       } else {
-        alert(contentResponse.Content);
+        this.errors = result.ErrorMessages;
       }
 
       this.refreshComponent();

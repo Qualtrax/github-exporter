@@ -56,6 +56,11 @@ export class SettingsPageComponent extends BaseComponent {
         <input id="${Settings.PaginationCount}" value="${this.getSettingValue(Settings.PaginationCount)}"
           type="range" min="1" max="100">
       </li>
+
+      <li>
+        <label for="${Settings.MaxPageCount}">${SettingsMap.get(Settings.MaxPageCount)?.label}</label>
+        <input id="${Settings.MaxPageCount}" value="${this.getSettingValue(Settings.MaxPageCount)}" type="number" min="0">
+      </li>
     </ul>
 
     <button id="${ids.saveButton}">Save Changes</button>

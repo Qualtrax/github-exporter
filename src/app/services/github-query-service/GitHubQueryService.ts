@@ -1,9 +1,14 @@
-import { HttpClient, HttpMethod, HttpRequestMessage, HttpResponseMessage, KeyValue, Repository, Strings } from 'tsbase';
+import {
+  GenericResult, HttpClient, HttpMethod, HttpRequestMessage, KeyValue,
+  Queryable,
+  Repository, Strings } from 'tsbase';
+import { RepositoryIssues } from '../../domain/GitHubDataTypes';
+import { GitHubExport } from '../../domain/GitHubExport';
 import { Settings, SettingsMap } from '../../enums/module';
 import { SettingsService } from '../file-system/SettingsService';
 
 export interface IGitHubQueryService {
-  GetApiResults(): Promise<HttpResponseMessage>
+  GetApiResults(): Promise<GenericResult<GitHubExport>>
 }
 
 export class GitHubQueryService implements IGitHubQueryService {
@@ -24,16 +29,34 @@ export class GitHubQueryService implements IGitHubQueryService {
     private settingsRepository: Repository<KeyValue>
   ) { }
 
-  public async GetApiResults(): Promise<HttpResponseMessage> {
-    const request = this.getGitHubApiRequest();
+  public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
+    const gitHubExport: GitHubExport = { repository: { issues: [] } };
+    const result = new GenericResult<GitHubExport>(gitHubExport);
 
-    return await this.httpClient.SendAsync(request);
+    let pagesRequested = 0;
+    const maxPageCount = parseInt(this.getSettingOrDefault(Settings.MaxPageCount));
+    let afterCursor: string | undefined;
+
+    do {
+      pagesRequested++;
+      const request = this.getGitHubApiRequest(afterCursor);
+      const response = await this.httpClient.SendAsync(request);
+
+      if (!response.IsSuccessStatusCode) {
+        result.AddError(response.Content);
+      } else {
+        afterCursor = this.addResponseContentToResult(response, result, gitHubExport);
+        afterCursor = (maxPageCount === 0 || pagesRequested < maxPageCount) ? afterCursor : undefined;
+      }
+    } while (afterCursor);
+
+    return result;
   }
 
-  private getGitHubApiRequest = (): HttpRequestMessage => {
+  private getGitHubApiRequest = (afterCursor?: string): HttpRequestMessage => {
     const request = new HttpRequestMessage(HttpMethod.POST);
     request.RequestUri = 'https://api.github.com/graphql';
-    request.Content = JSON.stringify({query: this.getGraphQlQuery()});
+    request.Content = JSON.stringify({query: this.getGraphQlQuery(afterCursor)});
     request.Headers = [
       { key: 'Authorization', value: `Bearer ${this.getSettingOrDefault(Settings.GitHubAuthToken)}` },
       { key: 'Content-Type', value: 'application/json' }
@@ -50,14 +73,14 @@ export class GitHubQueryService implements IGitHubQueryService {
       Strings.Empty;
   }
 
-  private getGraphQlQuery = (): string =>
+  private getGraphQlQuery = (afterCursor?: string): string =>
     `{
       repository(
         name: "${this.getSettingOrDefault(Settings.RepositoryName)}",
         owner: "${this.getSettingOrDefault(Settings.RepositoryOwner)}") {
-        issues (filterBy: {
-          states: ${this.getSettingOrDefault(Settings.IssueStatus)}},
-          first: ${this.getSettingOrDefault(Settings.PaginationCount)}) {
+        issues (filterBy: {states: ${this.getSettingOrDefault(Settings.IssueStatus)}},
+          first: ${this.getSettingOrDefault(Settings.PaginationCount)}
+          ${afterCursor ? `, after: "${afterCursor}"` : Strings.Empty}) {
           nodes {
             createdAt,
             closedAt,
@@ -87,4 +110,30 @@ export class GitHubQueryService implements IGitHubQueryService {
         }
       }
     }`;
+
+  private addResponseContentToResult = (
+    response,
+    result: GenericResult<GitHubExport>,
+    gitHubExport: GitHubExport
+  ): string | undefined => {
+    let afterCursor: string | undefined;
+    const json = JSON.parse(response.Content);
+
+    if (json.errors) {
+      json.errors.forEach(error => {
+        result.AddError((error as Error).message);
+      });
+    } else {
+      const repositoryIssues = json as RepositoryIssues;
+      // eslint-disable-next-line no-console
+      console.log(repositoryIssues);
+      gitHubExport.repository.issues = gitHubExport.repository.issues.concat(
+        repositoryIssues.data.repository.issues.nodes);
+
+      repositoryIssues.data.repository.issues.pageInfo.hasNextPage ?
+        afterCursor = Queryable.From(repositoryIssues.data.repository.issues.edges).Last()?.cursor : null;
+    }
+
+    return afterCursor;
+  }
 }

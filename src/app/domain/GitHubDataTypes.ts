@@ -26,7 +26,7 @@ export type Issue = {
     nodes: Array<{name: string}>
   }
   comments: {
-    nodes: Array<{Comment}>
+    nodes: Array<Comment>
   }
 }
 
@@ -36,8 +36,4 @@ export type Comment = {
   },
   createdAt: string,
   bodyHTML: string
-}
-
-export type Error = {
-  message: string
 }
