@@ -32,7 +32,7 @@ export class GitHubQueryService implements IGitHubQueryService {
   public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
     const gitHubExport: GitHubExport = { repository: {
       // eslint-disable-next-line max-len
-      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueStatus)}/${this.getSettingOrDefault(Settings.IssueType)}`,
+      name: (`${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueStatus)}/${this.getSettingOrDefault(Settings.IssueType)}`).toLowerCase(),
       issues: new Array<Issue>(),
       pullRequests: new Array<Issue>()
     } };
@@ -48,7 +48,12 @@ export class GitHubQueryService implements IGitHubQueryService {
       const response = await this.httpClient.SendAsync(request);
 
       if (!response.IsSuccessStatusCode) {
-        result.AddError(response.Content);
+        const abuseDetected = await this.handleAbuseDetectionMechanism(response.Content);
+
+        if (!abuseDetected) {
+          result.AddError(response.Content);
+          afterCursor = undefined;
+        }
       } else {
         afterCursor = this.addResponseContentToResult(response, result, gitHubExport);
         afterCursor = (maxPageCount === 0 || pagesRequested < maxPageCount) ? afterCursor : undefined;
@@ -56,6 +61,18 @@ export class GitHubQueryService implements IGitHubQueryService {
     } while (afterCursor);
 
     return result;
+  }
+
+  private handleAbuseDetectionMechanism = async (responseContent: string): Promise<boolean> => {
+    if (responseContent.indexOf('abuse detection') >= 0) {
+      const oneMinute = 1000 * 60;
+      const sleepOneMinute = () => new Promise((resolve) => setTimeout(resolve, oneMinute));
+      await sleepOneMinute();
+
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private getGitHubApiRequest = (afterCursor?: string): HttpRequestMessage => {
@@ -133,6 +150,7 @@ export class GitHubQueryService implements IGitHubQueryService {
     } else {
       const issueKey: IssueType.Issues | IssueType.PullRequests =
         this.getSettingOrDefault(Settings.IssueType) as IssueType;
+
       const repositoryIssues = json as RepositoryIssues;
 
       gitHubExport.repository[issueKey] = gitHubExport.repository[issueKey].concat(

@@ -44,10 +44,10 @@ export class SettingsPageComponent extends BaseComponent {
         <label for="${Settings.IssueType}">${SettingsMap.get(Settings.IssueType)?.label}</label>
         <select id="${Settings.IssueType}" value="${this.getSettingValue(Settings.IssueType)}">
           <option value="${IssueType.Issues}"
-            ${this.getSettingValue(Settings.IssueStatus) === IssueType.Issues ? 'selected="selected"' : Strings.Empty}>Issues</option>
+            ${this.getSettingValue(Settings.IssueType) === IssueType.Issues ? 'selected="selected"' : Strings.Empty}>Issues</option>
 
           <option value="${IssueType.PullRequests}"
-            ${this.getSettingValue(Settings.IssueStatus) === IssueType.PullRequests ? 'selected="selected"' : Strings.Empty}>Pull Requests</option>
+            ${this.getSettingValue(Settings.IssueType) === IssueType.PullRequests ? 'selected="selected"' : Strings.Empty}>Pull Requests</option>
         </select>
       </li>
 

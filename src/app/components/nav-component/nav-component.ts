@@ -8,7 +8,7 @@ type NavLink = { route: string, label: string, icon: string };
 export class NavigationComponent extends BaseComponent {
   private navLinks: { main: Array<NavLink>, admin: Array<NavLink> } = {
     main: [
-      { route: '/', label: 'Exporter', icon: Svgs.Home }
+      { route: '/', label: 'Exporter', icon: Svgs.Export }
     ],
     admin: [
       { route: '/settings', label: 'Settings', icon: Svgs.Settings }
