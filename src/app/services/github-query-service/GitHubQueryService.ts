@@ -1,13 +1,15 @@
 import {
   GenericResult, HttpClient, HttpMethod, HttpRequestMessage, KeyValue,
-  Queryable,
-  Repository, Strings } from 'tsbase';
+  Observable, Queryable, Repository, Strings } from 'tsbase';
 import { Issue, RepositoryIssues } from '../../domain/GitHubDataTypes';
 import { GitHubExport } from '../../domain/GitHubExport';
 import { IssueType, Settings, SettingsMap } from '../../enums/module';
 import { SettingsService } from '../file-system/SettingsService';
 
+export type FeedbackMessage = { issuesDownloaded: number, errorMessage: string };
+
 export interface IGitHubQueryService {
+  QueryFeedback: Observable<FeedbackMessage>,
   GetApiResults(): Promise<GenericResult<GitHubExport>>
 }
 
@@ -29,13 +31,11 @@ export class GitHubQueryService implements IGitHubQueryService {
     private settingsRepository: Repository<KeyValue>
   ) { }
 
+  public QueryFeedback = new Observable<FeedbackMessage>();
+
   public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
-    const gitHubExport: GitHubExport = { repository: {
-      // eslint-disable-next-line max-len
-      name: (`${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}/${this.getSettingOrDefault(Settings.IssueStatus)}/${this.getSettingOrDefault(Settings.IssueType)}`).toLowerCase(),
-      issues: new Array<Issue>(),
-      pullRequests: new Array<Issue>()
-    } };
+    const gitHubExport: GitHubExport = { repository:
+      { name: this.getExportName(), issues: new Array<Issue>(), pullRequests: new Array<Issue>()}};
     const result = new GenericResult<GitHubExport>(gitHubExport);
 
     let pagesRequested = 0;
@@ -57,14 +57,33 @@ export class GitHubQueryService implements IGitHubQueryService {
       } else {
         afterCursor = this.addResponseContentToResult(response, result, gitHubExport);
         afterCursor = (maxPageCount === 0 || pagesRequested < maxPageCount) ? afterCursor : undefined;
+        const paginationCount = parseInt(this.getSettingOrDefault(Settings.PaginationCount));
+        this.QueryFeedback.Publish({ issuesDownloaded: pagesRequested * paginationCount, errorMessage: Strings.Empty });
       }
     } while (afterCursor);
 
     return result;
   }
 
+  private getExportName = (): string => {
+    const owner = this.getSettingOrDefault(Settings.RepositoryOwner);
+    const name = this.getSettingOrDefault(Settings.RepositoryName);
+    const issueType = this.getSettingOrDefault(Settings.IssueType);
+    const issueStatus = this.getSettingOrDefault(Settings.IssueStatus);
+
+    const exportName = `${owner}/${name}/${issueType === IssueType.Issues ? `${issueStatus}/` : Strings.Empty}${issueType}`;
+    return exportName.toLowerCase();
+  }
+
   private handleAbuseDetectionMechanism = async (responseContent: string): Promise<boolean> => {
     if (responseContent.indexOf('abuse detection') >= 0) {
+      const resumeTime = new Date();
+      resumeTime.setMinutes(resumeTime.getMinutes() + 1);
+      this.QueryFeedback.Publish({
+        issuesDownloaded: 0,
+        errorMessage: `API abuse triggered; export will resume at ${resumeTime.toLocaleTimeString()}`
+      });
+
       const oneMinute = 1000 * 60;
       const sleepOneMinute = () => new Promise((resolve) => setTimeout(resolve, oneMinute));
       await sleepOneMinute();

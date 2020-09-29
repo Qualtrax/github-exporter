@@ -3,12 +3,14 @@ import { Component, BaseComponent, SeoService, Html, DomEventTypes } from 'tsbas
 import { GitHubExport } from '../../domain/GitHubExport';
 import { Classes, Images, Routes } from '../../enums/module';
 import { DownloadService, IDownloadService } from '../../services/file-system/DownloadService';
-import { GitHubQueryService, IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
+import { FeedbackMessage, GitHubQueryService, IGitHubQueryService } from '../../services/github-query-service/GitHubQueryService';
 
 const ids = {
   submitButton: 'submitButton',
   loadingGifWrapper: 'loadingGifWrapper',
-  downloadExportButton: 'downloadExportButton'
+  downloadExportButton: 'downloadExportButton',
+  issuesDownloadedLabel: 'issuesDownloadedLabel',
+  errorMessageLabel: 'errorMessageLabel'
 };
 
 @Component({ selector: 'exporter-page', route: '/' })
@@ -16,6 +18,7 @@ export class ExporterPageComponent extends BaseComponent {
   private githubExport: GitHubExport | null = null;
   private errors: Array<string> | null = null;
   private pageTitle = 'Issue Exporter';
+  private queryProgressRef = '';
 
   constructor(
     private gitHubQueryService: IGitHubQueryService = GitHubQueryService.Instance(),
@@ -28,6 +31,10 @@ export class ExporterPageComponent extends BaseComponent {
     SeoService.Instance.SetDefaultTags(this.pageTitle);
   }
 
+  public disconnectedCallback(): void {
+    this.gitHubQueryService.QueryFeedback.Cancel(this.queryProgressRef);
+  }
+
   protected template = (): string => /*html*/ `
   <div class="exporter-page-component">
     <h1>${this.pageTitle}</h1>
@@ -37,6 +44,8 @@ export class ExporterPageComponent extends BaseComponent {
 
     <div id="${ids.loadingGifWrapper}" class="${Classes.Hidden}">
       <img src="${Images.LoadingGif}" alt="Loading icon">
+      <p id="${ids.issuesDownloadedLabel}"></p>
+      <p id="${ids.errorMessageLabel}"></p>
     </div>
 
     ${this.githubExport || this.errors ? /*html*/ `
@@ -70,8 +79,10 @@ export class ExporterPageComponent extends BaseComponent {
   private onSubmissionAttempted = async (event: Event | null): Promise<any> => {
     if (event) {
       event.preventDefault();
-
       this.showLoadingGif();
+      this.queryProgressRef = this.gitHubQueryService.QueryFeedback.Subscribe((feedback) => {
+        this.handleQueryFeedback(feedback);
+      });
 
       const result = await this.gitHubQueryService.GetApiResults();
 
@@ -82,6 +93,18 @@ export class ExporterPageComponent extends BaseComponent {
       }
 
       this.refreshComponent();
+    }
+  }
+
+  private handleQueryFeedback(feedback: FeedbackMessage | undefined) {
+    const issuesDownloadedLabel = this.Dom.getElementById(ids.issuesDownloadedLabel) as HTMLParagraphElement;
+    const errorMessageLabel = this.Dom.getElementById(ids.errorMessageLabel) as HTMLParagraphElement;
+
+    if (feedback) {
+      errorMessageLabel.innerText = feedback.errorMessage;
+      if (feedback.issuesDownloaded !== 0) {
+        issuesDownloadedLabel.innerText = `${feedback.issuesDownloaded} issues downloaded`;
+      }
     }
   }
 

@@ -13,6 +13,16 @@
     }
   }
 
+  #loadingGifWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+      max-height: 50vh;
+    }
+  }
+
   @media (min-width: $tablet) {
 
   }
