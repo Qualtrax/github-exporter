@@ -2,7 +2,7 @@ import {
   GenericResult, HttpClient, HttpMethod, HttpRequestMessage, KeyValue,
   Queryable,
   Repository, Strings } from 'tsbase';
-import { RepositoryIssues } from '../../domain/GitHubDataTypes';
+import { Issue, RepositoryIssues } from '../../domain/GitHubDataTypes';
 import { GitHubExport } from '../../domain/GitHubExport';
 import { Settings, SettingsMap } from '../../enums/module';
 import { SettingsService } from '../file-system/SettingsService';
@@ -30,7 +30,10 @@ export class GitHubQueryService implements IGitHubQueryService {
   ) { }
 
   public async GetApiResults(): Promise<GenericResult<GitHubExport>> {
-    const gitHubExport: GitHubExport = { repository: { issues: [] } };
+    const gitHubExport: GitHubExport = { repository: {
+      name: `${this.getSettingOrDefault(Settings.RepositoryOwner)}/${this.getSettingOrDefault(Settings.RepositoryName)}`,
+      issues: new Array<Issue>()
+    } };
     const result = new GenericResult<GitHubExport>(gitHubExport);
 
     let pagesRequested = 0;
