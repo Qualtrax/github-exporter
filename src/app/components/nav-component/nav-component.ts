@@ -1,6 +1,5 @@
 import { Component, BaseComponent, Html } from 'tsbase-components';
-import { Classes } from '../../enums/Classes';
-import { Svgs } from '../../enums/Svgs';
+import { Classes, Routes, Svgs } from '../../enums/module';
 
 type NavLink = { route: string, label: string, icon: string };
 
@@ -8,10 +7,10 @@ type NavLink = { route: string, label: string, icon: string };
 export class NavigationComponent extends BaseComponent {
   private navLinks: { main: Array<NavLink>, admin: Array<NavLink> } = {
     main: [
-      { route: '/', label: 'Exporter', icon: Svgs.Export }
+      { route: Routes.Exporter, label: 'Exporter', icon: Svgs.Export }
     ],
     admin: [
-      { route: '/settings', label: 'Settings', icon: Svgs.Settings }
+      { route: Routes.Settings, label: 'Settings', icon: Svgs.Settings }
     ]
   };
 

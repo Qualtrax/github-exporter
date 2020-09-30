@@ -1,6 +1,9 @@
 @import '../../scss/sass.scss';
 
 .settings-page-component {
+  em {
+    font-weight: lighter;
+  }
 
   @media (min-width: $tablet) {
 

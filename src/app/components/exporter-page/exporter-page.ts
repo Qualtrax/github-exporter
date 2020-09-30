@@ -15,7 +15,7 @@ const ids = {
   errorMessageLabel: 'errorMessageLabel'
 };
 
-@Component({ selector: 'exporter-page', route: '/' })
+@Component({ selector: 'exporter-page', route: Routes.Exporter })
 export class ExporterPageComponent extends BaseComponent {
   private githubExport: GitHubExport | null = null;
   private errors: Array<string> | null = null;

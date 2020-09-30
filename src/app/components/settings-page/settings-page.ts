@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Strings } from 'tsbase';
 import { Component, BaseComponent, SeoService, DomEventTypes } from 'tsbase-components';
-import { IssueStatus } from '../../enums/module';
+import { IssueStatus, Routes } from '../../enums/module';
 import { IssueType, Settings, SettingsMap } from '../../enums/Settings';
 import { SettingsService } from '../../services/file-system/SettingsService';
 
@@ -10,7 +10,7 @@ const ids = {
   paginationSliderLabel: 'paginationSliderLabel'
 };
 
-@Component({ selector: 'settings-page', route: '/settings' })
+@Component({ selector: 'settings-page', route: Routes.Settings })
 export class SettingsPageComponent extends BaseComponent {
   constructor(private settingsRepository = SettingsService.Instance().Repository) {
     super();
@@ -26,7 +26,7 @@ export class SettingsPageComponent extends BaseComponent {
 
     <ul>
       <li>
-        <label for="${Settings.GitHubAuthToken}">${SettingsMap.get(Settings.GitHubAuthToken)?.label}</label>
+        <label for="${Settings.GitHubAuthToken}">${SettingsMap.get(Settings.GitHubAuthToken)?.label} <em>- https://github.com/settings/tokens</em></label>
         <input id="${Settings.GitHubAuthToken}" type="text" value="${this.getSettingValue(Settings.GitHubAuthToken)}">
       </li>
 
@@ -52,7 +52,7 @@ export class SettingsPageComponent extends BaseComponent {
       </li>
 
       <li>
-        <label for="${Settings.IssueStatus}">${SettingsMap.get(Settings.IssueStatus)?.label}</label>
+        <label for="${Settings.IssueStatus}">${SettingsMap.get(Settings.IssueStatus)?.label} <em>- not used for pull requests</em></label>
         <select id="${Settings.IssueStatus}" value="${this.getSettingValue(Settings.IssueStatus)}">
           <option value="${IssueStatus.Open}"
             ${this.getSettingValue(Settings.IssueStatus) === IssueStatus.Open ? 'selected="selected"' : Strings.Empty}>${IssueStatus.Open}</option>
