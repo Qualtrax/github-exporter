@@ -1,20 +1,18 @@
 import { Mock } from 'tsmockit';
-import { HttpClient, HttpRequestMessage, HttpResponseMessage, KeyValue, Repository, Strings } from 'tsbase';
+import { HttpClient, HttpRequestMessage, HttpResponseMessage, Strings } from 'tsbase';
 import { GitHubQueryService, IGitHubQueryService } from './GitHubQueryService';
+import { ISettingsService } from '../file-system/SettingsService';
 
 describe('GitHubQueryService', () => {
   const mockHttpClient = new Mock<HttpClient>();
-  const mockSettingsRepository = new Mock<Repository<KeyValue>>();
+  const mockSettingsService = new Mock<ISettingsService>();
   let classUnderTest: IGitHubQueryService;
 
   beforeEach(() => {
     mockHttpClient.Setup(c => c.SendAsync(
       new HttpRequestMessage()), new HttpResponseMessage(Strings.Empty, { Code: 200, Text: 'OK' }));
-    mockSettingsRepository.Setup(r => r.Add({ key: Strings.Empty, value: Strings.Empty }));
-    mockSettingsRepository.Setup(r => r.Find(() => true), null);
-    mockSettingsRepository.Setup(r => r.SaveChanges());
 
-    classUnderTest = GitHubQueryService.Instance();
+    classUnderTest = GitHubQueryService.Instance(mockHttpClient.Object, mockSettingsService.Object);
   });
 
   it('should construct', () => {

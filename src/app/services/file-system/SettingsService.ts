@@ -1,10 +1,12 @@
-import { FSPersister, IPersister, KeyValue, Repository } from 'tsbase';
+import { FSPersister, IPersister, KeyValue, Repository, Strings } from 'tsbase';
 import { FileSystemAdapter } from './FileSystemAdapter';
 import { PathResolver } from './PathResolver';
 import { Constants } from '../../constants';
+import { Settings, SettingsMap } from '../../enums/module';
 
 export interface ISettingsService {
   Repository: Repository<KeyValue>;
+  GetSettingOrDefault(settingName: Settings): string;
 }
 
 export class SettingsService implements ISettingsService {
@@ -25,5 +27,14 @@ export class SettingsService implements ISettingsService {
       FileSystemAdapter);
 
     this.Repository = new Repository<KeyValue>(persister);
+  }
+
+
+  public GetSettingOrDefault(settingName: Settings): string {
+    const setting = this.Repository.Find(s => s.key === settingName);
+    return setting ?
+      setting.value :
+      SettingsMap.get(settingName)?.default ||
+      Strings.Empty;
   }
 }

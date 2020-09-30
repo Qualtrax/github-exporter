@@ -5,6 +5,21 @@
     font-weight: lighter;
   }
 
+  details {
+    margin-bottom: 40px;
+
+    h2 {
+      padding: 0;
+      margin: 0;
+    }
+
+    summary {
+      display: flex;
+      flex-direction: column-reverse;
+      margin-bottom: 10px;
+    }
+  }
+
   @media (min-width: $tablet) {
 
   }

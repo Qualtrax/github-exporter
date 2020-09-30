@@ -7,7 +7,10 @@ export enum Settings {
   PaginationCount = 'paginationCount',
   MaxPageCount = 'maxPageCount',
   RepositoryName = 'repositoryName',
-  RepositoryOwner = 'repositoryOwner'
+  RepositoryOwner = 'repositoryOwner',
+  WorkItemType = 'WorkItemType',
+  WorkItemOpenState = 'workItemOpenState',
+  WorkItemClosedState = 'workItemClosedState'
 }
 
 export enum IssueStatus {
@@ -27,5 +30,8 @@ export const SettingsMap = new Map<string, { label: string, default: string }>([
   [Settings.PaginationCount, { label: 'Pagination Count', default: '100' }],
   [Settings.MaxPageCount, { label: 'Max Page Count (0 = unlimited)', default: '0' }],
   [Settings.RepositoryName, { label: 'Repository Name', default: Strings.Empty }],
-  [Settings.RepositoryOwner, { label: 'Repository Owner', default: Strings.Empty }]
+  [Settings.RepositoryOwner, { label: 'Repository Owner', default: Strings.Empty }],
+  [Settings.WorkItemType, { label: 'Work Item Type', default: 'Issue' }],
+  [Settings.WorkItemOpenState, { label: 'Work Item Open State', default: 'Active' }],
+  [Settings.WorkItemClosedState, { label: 'Work Item Closed State', default: 'Closed' }]
 ]);
