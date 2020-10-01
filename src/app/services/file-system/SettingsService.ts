@@ -32,7 +32,7 @@ export class SettingsService implements ISettingsService {
 
   public GetSettingOrDefault(settingName: Settings): string {
     const setting = this.Repository.Find(s => s.key === settingName);
-    return setting ?
+    return setting && !Strings.IsEmptyOrWhiteSpace(setting.value) ?
       setting.value :
       SettingsMap.get(settingName)?.default ||
       Strings.Empty;
