@@ -1,5 +1,6 @@
 import { KeyValue, Repository, Strings } from 'tsbase';
 import { Mock } from 'tsmockit';
+import { Settings } from '../../enums/module';
 import { ISettingsService } from '../../services/file-system/SettingsService';
 import { SettingsPageComponent } from './settings-page';
 
@@ -13,7 +14,7 @@ describe('SettingsPageComponent', () => {
     mockSettingsRepository.Setup(r => r.Find(() => true), null);
     mockSettingsRepository.Setup(r => r.SaveChanges());
     mockSettingsService.Setup(s => s.Repository, mockSettingsRepository.Object);
-    mockSettingsService.Setup(s => s.GetSettingOrDefault, Strings.Empty);
+    mockSettingsService.Setup(s => s.GetSettingOrDefault(Settings.GitHubAuthToken), Strings.Empty);
 
     componentUnderTest = new SettingsPageComponent(mockSettingsService.Object);
   });
