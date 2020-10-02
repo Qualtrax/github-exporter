@@ -9,7 +9,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     icon: 'images/favicon.png',
     height: 600,
-    width: 800
+    width: 800,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
 
   // and load the index.html of the app.
