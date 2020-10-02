@@ -6,3 +6,4 @@ coverage
 src/coverage
 TESTS*.xml
 bin
+settings.json

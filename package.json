@@ -48,7 +48,7 @@
     "puppeteer": "^1.20.0",
     "reflect-metadata": "^0.1.13",
     "ts-loader": "^5.4.5",
-    "tsbase": "^3.0.11",
+    "tsbase": "^3.0.12",
     "tsbase-components": "2.1.0",
     "tslib": "^1.13.0",
     "tsmockit": "^1.0.5",

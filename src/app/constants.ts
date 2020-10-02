@@ -1,4 +1,4 @@
 export const Constants = {
-  LocalFilesDirectory: 'github-exporter',
-  SettingsFilePath: 'github-exporter/settings.json'
+  LocalFilesDirectory: './',
+  SettingsFilePath: './settings.json'
 };
