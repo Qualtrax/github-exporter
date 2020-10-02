@@ -23,7 +23,8 @@ export class AzureDevopsWorkItem {
       this.workItemType = settingsService.GetSettingOrDefault(Settings.WorkItemType);
       this.title = this.minified(issue.title);
       this.description =
-        `<h2>GitHub Labels</h2>${labels}\
+        `<h2>GitHub ID: ${issue.number}</h2>
+<h2>GitHub Labels</h2>${labels}\
 <h2>GitHub Description</h2>${this.minified(issue.bodyHTML)}\
 <h2>GitHub Comments</h2>${comments}`;
       this.createdDate = issue.createdAt;

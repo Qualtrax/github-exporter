@@ -17,7 +17,6 @@ export type Issues = {
 }
 
 export type Issue = {
-  id: string,
   createdAt: string,
   closedAt: string,
   number: number,
