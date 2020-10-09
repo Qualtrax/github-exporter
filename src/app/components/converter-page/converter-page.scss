@@ -1,0 +1,33 @@
+@import '../../scss/sass.scss';
+
+.converter-page-component {
+
+  ul {
+
+    li {
+      &.issue-item,
+      &.comment-item {
+        padding: 10px;
+        border: 1px solid grey;
+      }
+    }
+  }
+
+  #loadingGifWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    img {
+      max-height: 50vh;
+    }
+  }
+
+  @media (min-width: $tablet) {
+
+  }
+
+  @media (min-width: $desktop) {
+
+  }
+}
