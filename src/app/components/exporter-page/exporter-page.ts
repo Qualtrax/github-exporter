@@ -1,6 +1,5 @@
-import { Strings, Csv } from 'tsbase';
+import { Strings } from 'tsbase';
 import { Component, BaseComponent, SeoService, Html, DomEventTypes } from 'tsbase-components';
-import { AzureDevopsWorkItem, AzureWorkItemFields } from '../../domain/AzureDevopsDataTypes';
 import { GitHubExport } from '../../domain/GitHubExport';
 import { Classes, Images, Routes } from '../../enums/module';
 import { DownloadService, IDownloadService } from '../../services/file-system/DownloadService';
@@ -55,8 +54,7 @@ export class ExporterPageComponent extends BaseComponent {
 
     ${this.githubExport ? /*html*/ `
     <p>${this.githubExport.repository.issues.length + this.githubExport.repository.pullRequests.length} issues exported!</p>
-    <button id="${ids.jsonDownloadButton}">Raw JSON</button>
-    <button id="${ids.azureDevopsDownloadButton}">Azure Devops CSV</button>` : Strings.Empty}
+    <button id="${ids.jsonDownloadButton}">Raw JSON</button>` : Strings.Empty}
 
     ${this.errors ? this.repositoryIssuesErrors(this.errors) : Strings.Empty}
     ` : Strings.Empty}
@@ -77,18 +75,6 @@ export class ExporterPageComponent extends BaseComponent {
 
     this.addEventListenerToElementId(ids.jsonDownloadButton, DomEventTypes.Click, () => {
       this.downloadService.DownloadFile(JSON.stringify(this.githubExport), `${this.githubExport?.repository.name}.json`, 'json');
-    });
-
-    this.addEventListenerToElementId(ids.azureDevopsDownloadButton, DomEventTypes.Click, () => {
-      if (this.githubExport) {
-        const issuesToExport = this.githubExport.repository.issues.length >= 1 ?
-          this.githubExport.repository.issues : this.githubExport.repository.pullRequests;
-
-        const azureWorkItems = issuesToExport.map(i => new AzureDevopsWorkItem(i));
-        const csv = Csv.EncodeAsCsv(AzureWorkItemFields, azureWorkItems);
-
-        this.downloadService.DownloadFile(csv, `${this.githubExport.repository.name}.csv`, 'csv');
-      }
     });
   }
 

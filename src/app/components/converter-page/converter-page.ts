@@ -38,8 +38,7 @@ export class ConverterPageComponent extends BaseComponent {
     <h3>Convert "${this.fileSelected.name}"</h3>
       <button id="${ids.azureExportButton}">Azure Devops</button>` : /*html*/ `
       <p><em>Select a file to convert</em></p>`}
-    </div>
-  `;
+    </div>`;
 
   private handleFileChange = async (evt): Promise<any> => {
     this.fileSelected = evt.target.files[0];
@@ -59,9 +58,16 @@ export class ConverterPageComponent extends BaseComponent {
       };
 
       const azureWorkItems = this.githubExport.repository.issues.map(i => new AzureDevopsWorkItem(i));
-      const csv = Csv.EncodeAsCsv(AzureWorkItemFields, azureWorkItems);
 
-      this.downloadService.DownloadFile(csv, `${this.githubExport.repository.name}.csv`, 'csv');
+      const setsOfOneThousand = Math.ceil(azureWorkItems.length / 1000);
+
+      for (let i = 0; i < setsOfOneThousand; i++) {
+        const start = i * 1000;
+        const end = azureWorkItems.length >= (start + 999) ? start + 999 : azureWorkItems.length;
+
+        const csv = Csv.EncodeAsCsv(AzureWorkItemFields, azureWorkItems.slice(start, end));
+        this.downloadService.DownloadFile(csv, `${this.githubExport.repository.name}-${start}-${end}.csv`, 'csv');
+      }
     }
   }
 
