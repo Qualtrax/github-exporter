@@ -1,4 +1,4 @@
-import { readFile } from 'fs';
+import { readFileSync } from 'fs';
 import { Routes } from '../../enums/Routes';
 import { Component, BaseComponent, SeoService, DomEventTypes } from 'tsbase-components';
 import { Csv } from 'tsbase/Functions/Csv';
@@ -34,10 +34,10 @@ export class ConverterPageComponent extends BaseComponent {
 
     <hr />
 
-    ${this.fileSelected.name ?
-    `<h3>Convert "${this.fileSelected.name}"</h3>
-      <button id="${ids.azureExportButton}">Azure Devops</button>` :
-    '<p><em>Select a file to convert</em></p>'}
+    ${this.fileSelected.name ? /*html*/`
+    <h3>Convert "${this.fileSelected.name}"</h3>
+      <button id="${ids.azureExportButton}">Azure Devops</button>` : /*html*/ `
+      <p><em>Select a file to convert</em></p>`}
     </div>
   `;
 
@@ -47,25 +47,22 @@ export class ConverterPageComponent extends BaseComponent {
   };
 
   private convertToAzure = async (): Promise<any> => {
-    readFile(this.fileSelected.path, 'utf-8', (err, data) => {
-      if (err) {
-        console.error(err);
-      } else {
-        const repository = JSON.parse(data).repository;
-        this.githubExport = {
-          repository: {
-            name: repository.name,
-            issues: repository.issues,
-            pullRequests: repository.pullrequests
-          }
-        };
+    const data = readFileSync(this.fileSelected.path, 'utf-8');
+    if (data) {
+      const repository = JSON.parse(data).repository;
+      this.githubExport = {
+        repository: {
+          name: repository.name,
+          issues: repository.issues,
+          pullRequests: repository.pullrequests
+        }
+      };
 
-        const azureWorkItems = this.githubExport.repository.issues.map(i => new AzureDevopsWorkItem(i));
-        const csv = Csv.EncodeAsCsv(AzureWorkItemFields, azureWorkItems);
+      const azureWorkItems = this.githubExport.repository.issues.map(i => new AzureDevopsWorkItem(i));
+      const csv = Csv.EncodeAsCsv(AzureWorkItemFields, azureWorkItems);
 
-        this.downloadService.DownloadFile(csv, `${this.githubExport.repository.name}.csv`, 'csv');
-      }
-    });
+      this.downloadService.DownloadFile(csv, `${this.githubExport.repository.name}.csv`, 'csv');
+    }
   }
 
   protected onPostRender = async () => {
